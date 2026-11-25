@@ -1,0 +1,30 @@
+export declare const OIDC_REAUTH_WINDOW_MS: number;
+export type AuthSource = 'password' | 'oidc' | 'desktop';
+export interface SessionUser {
+    userId: number;
+    email: string;
+    authSource: AuthSource;
+    hasLocalPassword: boolean;
+    reauthenticatedAtMs: number | null;
+}
+export declare function hashSessionToken(s: string): string;
+export declare function isSessionRecentlyReauthenticated(session: SessionUser, now?: number): boolean;
+export declare function sessionReauthenticatedUntilMs(session: SessionUser, now?: number): number | null;
+export declare function normalizeEmail(email: string): string;
+export declare function userCount(): number;
+export declare function createUser(email: string, password: string): SessionUser;
+export declare function createPasswordlessUser(email: string): SessionUser;
+export declare function verifyCredentials(email: string, password: string): SessionUser | null;
+export declare function desktopSessionToken(): string;
+export declare function createSession(userId: number, authSource?: AuthSource): string;
+export declare function stampSessionReauthenticated(tokenHash: string, now?: number): boolean;
+export declare function validateSession(token: string | undefined | null): SessionUser | null;
+export declare function deleteSession(token: string | undefined | null): void;
+export declare const MAX_REAUTH_STRIKES = 3;
+export declare function recordReauthFailure(userId: number, token: string | undefined | null): boolean;
+export declare function clearReauthFailures(userId: number): void;
+export declare function resetReauthFailures(): void;
+export declare function updateEmail(userId: number, currentPassword: string, newEmail: string): boolean;
+export declare function updatePassword(userId: number, currentPassword: string, newPassword: string): boolean;
+export declare function accountEmail(): string | null;
+export declare function resetUserPassword(newPassword: string): SessionUser | null;

@@ -18,6 +18,8 @@ graph spaces {
 }
 
 graph import {
+    server.src.lib.jshost ++> server.src.services.auth { NULL, missing, plain }
+    server.src.lib.jshost ++> "server/src/services/model-retirement" { plain }
     server.src.lib.jshost ++> "server/src/lib/tool-validate" { NULL, plain }
     server.src.lib.jshost ++> "server/src/lib/anthropic-documents" { plain, sub }
     server.src.lib.jshost ++> "server/src/lib/request-log" { NULL, missing, plain, sub }
@@ -2737,9 +2739,6 @@ graph import {
         checkKeyHealth,
         markKeyHealthyFromRequest,
     }
-    "server/src/services/model-retirement" --> "server/src/lib/fallback-loop" {
-        noteModelRetirementSignal,
-    }
     server.src.db.index --> "server/src/lib/fallback-loop" { getDb, getSetting }
     server.src.lib.guardrails --> "server/src/lib/fallback-loop" {
         newBreaker,
@@ -2767,19 +2766,19 @@ graph import {
         learnOutputCapFromError,
         learnedOutputCap,
     }
-    server.src.db.index --> "server/src/services/model-retirement" { getDb }
-    "server/src/lib/error-classify" --> "server/src/services/model-retirement" {
+    server.src.db.index ++> "server/src/services/model-retirement" { getDb }
+    "server/src/lib/error-classify" ++> "server/src/services/model-retirement" {
         modelRetirementSignal,
     }
-    "server/src/lib/error-redaction" --> "server/src/services/model-retirement" {
+    "server/src/lib/error-redaction" ++> "server/src/services/model-retirement" {
         summarizeAttemptError,
     }
-    "server/src/services/model-state" --> "server/src/services/model-retirement" {
+    "server/src/services/model-state" ++> "server/src/services/model-retirement" {
         isCatalogManagedModel,
         retireCatalogModelUpstream,
     }
-    "server/src/lib/endpoint-scope" --> "server/src/services/model-retirement" { modelStatsKey }
-    "server/src/lib/server-logs" --> "server/src/services/model-retirement" { providerLog }
+    "server/src/lib/endpoint-scope" ++> "server/src/services/model-retirement" { modelStatsKey }
+    "server/src/lib/server-logs" ++> "server/src/services/model-retirement" { providerLog }
     server.src.db.index ++> server.src.lib.guardrails { getSetting }
     server.src.db.index ++> "server/src/lib/request-log" { getDb }
     "server/src/services/request-retention" ++> "server/src/lib/request-log" {
@@ -3684,13 +3683,6 @@ graph import {
     }
     "server/src/lib/url-guard" --> server.src.routes.keys { assessProviderUrl }
     "server/src/lib/budget-input" --> server.src.routes.keys { budgetInputSchema }
-    server.src.services.auth --> server.src.routes.keys {
-        SessionUser,
-        clearReauthFailures,
-        isSessionRecentlyReauthenticated,
-        recordReauthFailure,
-        verifyCredentials,
-    }
     server.src.services.ratelimit --> server.src.routes.keys {
         clearApinexCheckinCooldownsForKey,
         clearCooldownsForKey,
@@ -3765,8 +3757,8 @@ graph import {
         BUDGET_INPUT_ERROR,
         normalizeBudgetInput,
     }
-    server.src.db.index --> server.src.services.auth { getDb }
-    server.src.lib.password --> server.src.services.auth { hashPassword, verifyPassword }
+    server.src.db.index ++> server.src.services.auth { getDb }
+    server.src.lib.password ++> server.src.services.auth { hashPassword, verifyPassword }
     server.src.db.types --> "server/src/services/custom-media-register" { Db }
     "server/src/services/custom-endpoint" --> "server/src/services/custom-media-register" {
         customEndpointKeyIds,
@@ -4359,7 +4351,6 @@ graph import {
         embeddingsRetryAfterSec,
         runEmbeddings,
     }
-    server.src.services.auth --> server.src.routes.ollama { validateSession }
     server.src.db.index --> server.src.routes.update { getSetting }
     "server/src/lib/app-version" --> server.src.routes.update { getAppVersion }
     server.src.db.index --> "server/src/services/url-tokens" { getDb, getUnifiedApiKey }
@@ -4437,24 +4428,6 @@ graph import {
         getCompressionConfig,
     }
     server.src.services.compression.stats --> server.src.routes.compression { getCompressionStats }
-    server.src.services.auth --> server.src.routes.auth {
-        accountEmail,
-        clearReauthFailures,
-        createSession,
-        createUser,
-        deleteSession,
-        desktopSessionToken,
-        hashSessionToken,
-        normalizeEmail,
-        recordReauthFailure,
-        resetUserPassword,
-        sessionReauthenticatedUntilMs,
-        updateEmail,
-        updatePassword,
-        userCount,
-        validateSession,
-        verifyCredentials,
-    }
     server.src.services.oidc --> server.src.routes.auth {
         OIDC_TX_COOKIE_NAME,
         OidcFlowError,
@@ -4473,12 +4446,6 @@ graph import {
         resetCodeMatches,
     }
     server.src.db.index --> server.src.services.oidc { getDb }
-    server.src.services.auth --> server.src.services.oidc {
-        createPasswordlessUser,
-        createSession,
-        normalizeEmail,
-        stampSessionReauthenticated,
-    }
     "server/src/lib/setup-code" --> server.src.services.oidc { clearSetupCode }
     "server/src/lib/one-time-code" ++> "server/src/lib/setup-code" { createOneTimeCode }
     "server/src/lib/one-time-code" ++> "server/src/lib/reset-code" { createOneTimeCode }
@@ -4548,9 +4515,7 @@ graph import {
     }
     "server/src/services/budget-alerts" --> server.src.services.moderation { noteBudgetAlerts }
     server.src.services.health --> server.src.services.moderation { markKeyHealthyFromRequest }
-    server.src.services.auth --> server.src.middleware.requireAuth { validateSession }
     "server/src/lib/request-log" --> server.src.middleware.errorHandler { logRequest }
-    server.src.services.auth --> server.src.__tests__.helpers.auth { createSession, createUser }
     "server/src/lib/anthropic-documents" --> "server/src/__tests__/lib/anthropic-documents.test" {
         convertDocumentBlock,
         documentRejectionMessage,
@@ -6036,10 +6001,6 @@ graph import {
         getDb,
         initDb,
     }
-    server.src.services.auth --> "server/src/__tests__/routes/auth-desktop-session.test" {
-        userCount,
-        validateSession,
-    }
     server.src.routes.auth --> "server/src/__tests__/routes/auth-login-identifier.test" {
         authRouter,
     }
@@ -6047,18 +6008,11 @@ graph import {
         getDb,
         initDb,
     }
-    server.src.services.auth --> "server/src/__tests__/routes/auth-login-identifier.test" {
-        createUser,
-    }
     server.src.app --> "server/src/__tests__/routes/auth-login-throttle.test" { createApp }
     server.src.db.index --> "server/src/__tests__/routes/auth-login-throttle.test" { getDb, initDb }
-    server.src.services.auth --> "server/src/__tests__/routes/auth-login-throttle.test" {
-        createUser,
-    }
     server.src.app --> "server/src/__tests__/routes/auth-oidc.test" { createApp }
     server.src.db.index --> "server/src/__tests__/routes/auth-oidc.test" { getDb, initDb }
     server.src.lib.crypto --> "server/src/__tests__/routes/auth-oidc.test" { encrypt }
-    server.src.services.auth --> "server/src/__tests__/routes/auth-oidc.test" { createUser }
     "server/src/services/declarative-config" --> "server/src/__tests__/routes/auth-oidc.test" {
         applyDeclarativeConfig,
     }
@@ -6078,7 +6032,6 @@ graph import {
     "server/src/services/custom-model-seed" --> "server/src/services/declarative-config" {
         customModelSeed,
     }
-    server.src.services.auth --> "server/src/services/declarative-config" { createUser, userCount }
     server.src.services.oidc --> "server/src/services/declarative-config" {
         setDeclarativeOidcConfig,
     }
@@ -6285,10 +6238,6 @@ graph import {
         getModelGroups,
         resolveRequestedIdToMembers,
         setUnifyOverrides,
-    }
-    "server/src/services/model-retirement" --> "server/src/__tests__/routes/custom-endpoint-identity.test" {
-        noteModelRetirementSignal,
-        resetModelRetirementObservations,
     }
     "server/src/lib/endpoint-scope" --> "server/src/__tests__/routes/custom-endpoint-identity.test" {
         endpointHandle,
@@ -6771,11 +6720,6 @@ graph import {
     server.src.db.index --> "server/src/__tests__/routes/keys-reveal.test" { getDb, initDb }
     server.src.__tests__.helpers.auth --> "server/src/__tests__/routes/keys-reveal.test" {
         mintDashboardToken,
-    }
-    server.src.services.auth --> "server/src/__tests__/routes/keys-reveal.test" {
-        createSession,
-        resetReauthFailures,
-        validateSession,
     }
     server.src.app --> "server/src/__tests__/routes/keys-ssrf-guard.test" { createApp }
     server.src.db.index --> "server/src/__tests__/routes/keys-ssrf-guard.test" { getDb, initDb }
@@ -7972,10 +7916,6 @@ graph import {
     server.src.services.router --> "server/src/__tests__/services/declarative-config.test" {
         getRoutingStrategy,
     }
-    server.src.services.auth --> "server/src/__tests__/services/declarative-config.test" {
-        userCount,
-        verifyCredentials,
-    }
     "server/src/services/catalog-sync" --> "server/src/__tests__/services/declarative-config.test" {
         SETTING_LICENSE_KEY,
     }
@@ -8489,11 +8429,6 @@ graph import {
     server.src.db.index --> "server/src/__tests__/services/model-retirement.test" { getDb, initDb }
     "server/src/lib/error-classify" --> "server/src/__tests__/services/model-retirement.test" {
         modelRetirementSignal,
-    }
-    "server/src/services/model-retirement" --> "server/src/__tests__/services/model-retirement.test" {
-        RETIREMENT_CONFIRMATIONS_REQUIRED,
-        noteModelRetirementSignal,
-        resetModelRetirementObservations,
     }
     "server/src/services/model-state" --> "server/src/__tests__/services/model-retirement.test" {
         getCatalogModelTombstone,
@@ -9708,7 +9643,6 @@ graph import {
     "server/src/services/declarative-config" --> server.src.index { applyDeclarativeConfigFromEnv }
     "server/src/lib/db-backup" --> server.src.index { restoreDbBackupIfNeeded, startDbBackupPump }
     server.src.services.backups --> server.src.index { startBackupScheduler }
-    server.src.services.auth --> server.src.index { userCount }
     "server/src/lib/setup-code" --> server.src.index { generateSetupCode }
     "server/src/lib/env-drift" --> server.src.index { warnOnEnvDrift }
     "server/src/services/model-weight-overrides" --> server.src.index { warnOnRoutingOverrideDrift }
@@ -9738,4 +9672,72 @@ graph import {
     server.src.services.scoring --> "server/src/__tests__/routes/anthropic.test" { RoutingStrategy }
     server.src.services.scoring --> "server/src/lib/client-context" { PresetStrategy }
     server.src.db.types --> "server/src/lib/endpoint-scope" { Db }
+    "server/src/services/model-retirement" --> "server/src/lib/fallback-loop" {
+        noteModelRetirementSignal,
+    }
+    server.src.services.auth --> server.src.routes.keys {
+        SessionUser,
+        clearReauthFailures,
+        isSessionRecentlyReauthenticated,
+        recordReauthFailure,
+        verifyCredentials,
+    }
+    server.src.services.auth --> server.src.routes.ollama { validateSession }
+    server.src.services.auth --> server.src.routes.auth {
+        accountEmail,
+        clearReauthFailures,
+        createSession,
+        createUser,
+        deleteSession,
+        desktopSessionToken,
+        hashSessionToken,
+        normalizeEmail,
+        recordReauthFailure,
+        resetUserPassword,
+        sessionReauthenticatedUntilMs,
+        updateEmail,
+        updatePassword,
+        userCount,
+        validateSession,
+        verifyCredentials,
+    }
+    server.src.services.auth --> server.src.services.oidc {
+        createPasswordlessUser,
+        createSession,
+        normalizeEmail,
+        stampSessionReauthenticated,
+    }
+    server.src.services.auth --> server.src.middleware.requireAuth { validateSession }
+    server.src.services.auth --> server.src.__tests__.helpers.auth { createSession, createUser }
+    server.src.services.auth --> "server/src/__tests__/routes/auth-desktop-session.test" {
+        userCount,
+        validateSession,
+    }
+    server.src.services.auth --> "server/src/__tests__/routes/auth-login-identifier.test" {
+        createUser,
+    }
+    server.src.services.auth --> "server/src/__tests__/routes/auth-login-throttle.test" {
+        createUser,
+    }
+    server.src.services.auth --> "server/src/__tests__/routes/auth-oidc.test" { createUser }
+    server.src.services.auth --> "server/src/services/declarative-config" { createUser, userCount }
+    "server/src/services/model-retirement" --> "server/src/__tests__/routes/custom-endpoint-identity.test" {
+        noteModelRetirementSignal,
+        resetModelRetirementObservations,
+    }
+    server.src.services.auth --> "server/src/__tests__/routes/keys-reveal.test" {
+        createSession,
+        resetReauthFailures,
+        validateSession,
+    }
+    server.src.services.auth --> "server/src/__tests__/services/declarative-config.test" {
+        userCount,
+        verifyCredentials,
+    }
+    "server/src/services/model-retirement" --> "server/src/__tests__/services/model-retirement.test" {
+        RETIREMENT_CONFIRMATIONS_REQUIRED,
+        noteModelRetirementSignal,
+        resetModelRetirementObservations,
+    }
+    server.src.services.auth --> server.src.index { userCount }
 }
