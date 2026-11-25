@@ -2775,7 +2775,7 @@ graph import {
     server.src.db.index --> "server/src/services/request-retention" { getDb }
     server.src.db.index --> "server/src/lib/ttfb-budget" { Db, getDb }
     "server/src/lib/endpoint-scope" --> "server/src/lib/ttfb-budget" { endpointScopeForBaseUrl }
-    "server/src/lib/endpoint-scope" --> "server/src/lib/output-cap" { modelStatsKey }
+    "server/src/lib/endpoint-scope" ++> "server/src/lib/output-cap" { modelStatsKey }
     "server/src/services/specialist-text" --> server.src.routes.proxy {
         listSpecialists,
         serveSpecialist,
