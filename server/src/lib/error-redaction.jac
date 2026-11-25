@@ -1,7 +1,7 @@
 # Scrubs secrets and URLs from a provider's error text before it is stored or
 # shown. The quoted-key pattern is quote-tolerant so that JSON bodies are
 # caught, and a bare run of 32+ alphanumerics is taken for a credential.
-glob:priv REDACTIONS: list[any] = [
+glob:priv REDACTIONS: list[tuple[any, str]] = [
     (rx(r"\bBearer\s+[A-Za-z0-9._~+/-]+=*", "gi"), "Bearer [redacted]"),
     (
         rx(
@@ -32,7 +32,8 @@ def sanitizeProviderErrorMessage(message: any = None) -> str {
     if not text {
         return "Provider error";
     }
-    # Indexed, not unpacked: a tuple pattern unpacks through the runtime.
+    # Indexed, not unpacked: unpacking a tuple goes through the runtime, while
+    # an item of the typed list is read directly.
     for redaction in REDACTIONS {
         text = globalThis.String.prototype.replace.call(text, redaction[0], redaction[1]);
     }
