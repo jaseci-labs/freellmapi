@@ -10,19 +10,18 @@ glob:priv REDACTIONS: list[any] = [
         ),
         "$1$2$1$3$4[redacted]",
     ),
-    (rx(r"\bsk-[A-Za-z0-9_-]{8,}\b"), "[redacted-key]"),
-    (rx(r"\bgsk_[A-Za-z0-9_-]{8,}\b"), "[redacted-key]"),
-    (rx(r"\bfreellmapi-[A-Za-z0-9_-]{8,}\b"), "[redacted-key]"),
-    (rx(r"\bAIza[0-9A-Za-z_-]{20,}\b"), "[redacted-key]"),
-    (rx(r"\b[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\b"), "[redacted-token]"),
-    (rx(r"\b[A-Za-z0-9]{32,}\b"), "[redacted-token]"),
+    (rx(r"\bsk-[A-Za-z0-9_-]{8,}\b", "g"), "[redacted-key]"),
+    (rx(r"\bgsk_[A-Za-z0-9_-]{8,}\b", "g"), "[redacted-key]"),
+    (rx(r"\bfreellmapi-[A-Za-z0-9_-]{8,}\b", "g"), "[redacted-key]"),
+    (rx(r"\bAIza[0-9A-Za-z_-]{20,}\b", "g"), "[redacted-key]"),
+    (
+        rx(r"\b[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\b", "g"),
+        "[redacted-token]",
+    ),
+    (rx(r"\b[A-Za-z0-9]{32,}\b", "g"), "[redacted-token]"),
     (rx(r"\bhttps?:\/\/[^\s\x22'<>)]*", "gi"), "[redacted-url]"),
-    (rx(r"\s+"), " "),
+    (rx(r"\s+", "g"), " "),
 ];
-
-def:priv rx(pattern: str, flags: str = "g") -> any {
-    return new(globalThis.RegExp, pattern, flags);
-}
 
 def:priv capped(text: any, limit: int) -> str {
     return text if text.length <= limit else text.slice(0, limit - 3).trimEnd() + "...";

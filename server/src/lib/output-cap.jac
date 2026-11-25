@@ -7,14 +7,13 @@
 glob MIN_LEARNED_OUTPUT_CAP: int = 1024;
 
 glob:priv learned: dict[str, float] = {},
-          NULL: any = globalThis.JSON.parse("null"),
           PARAMS: str = "max[_ ]tokens|max_completion_tokens|max_output_tokens|max_output|maxoutputtokens|max_new_tokens",
           # The number after a ceiling phrase. No bare "exceeds N": that reads
           # any number in a message ("exceeds 30000 TPM").
           PHRASE: str = "(?:less than or equal to|must be less than|at most|no (?:more|greater) than|(?:cannot|must not|can not) exceed|greater than the maximum|maximum output tokens|maximum allowed value|max output tokens|maximum value|output limit|maximum is|exceeds (?:the )?model(?:'s)? max_output)\\W{0,4}(?:of\\s+)?\\W{0,2}(\\d{3,7})",
-          PARAM: any = new(globalThis.RegExp, f"\\b(?:{PARAMS})\\b"),
+          PARAM: any = rx(f"\\b(?:{PARAMS})\\b"),
           # The phrase must follow the parameter within one clause.
-          CEILING: any = new(globalThis.RegExp, f"\\b(?:{PARAMS})\\b[^.;]{{0,60}}?{PHRASE}");
+          CEILING: any = rx(f"\\b(?:{PARAMS})\\b[^.;]{{0,60}}?{PHRASE}");
 
 def:priv capKey(platform: str, modelId: str, endpointScope: any = None) -> str {
     return modelStatsKey(platform, modelId, endpointScope);

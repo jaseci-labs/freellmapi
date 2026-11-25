@@ -40,7 +40,7 @@ def:priv parseTimeoutEnv(name: str, defaultMs: float) -> float {
 }
 
 def:priv envName(prefix: str, platform: any) -> str {
-    return prefix + platform.toUpperCase().replace(new(globalThis.RegExp, "[^A-Z0-9]", "g"), "_");
+    return prefix + sub(platform.toUpperCase(), "[^A-Z0-9]", "_", "g");
 }
 
 def providerTimeoutEnvName(platform: str) -> str {

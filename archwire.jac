@@ -18,6 +18,17 @@ graph spaces {
 }
 
 graph import {
+    server.src.lib.jshost ++> "server/src/lib/model-scope" { NULL }
+    server.src.lib.jshost ++> "server/src/lib/min-context-window" { NULL, plain }
+    server.src.lib.jshost ++> "server/src/lib/output-cap" { NULL, rx }
+    server.src.lib.jshost ++> "server/src/lib/client-context" { NULL, plain, sub }
+    server.src.lib.jshost ++> "server/src/lib/error-redaction" { rx }
+    server.src.lib.jshost ++> "server/src/lib/one-time-code" { NULL }
+    server.src.lib.jshost ++> "server/src/lib/task-type" { rx }
+    server.src.lib.jshost ++> "server/src/lib/provider-timeout" { sub }
+    server.src.lib.jshost ++> "server/src/lib/wake-detect" { plain }
+    server.src.lib.jshost ++> "server/src/lib/attempt-trace" { NULL, plain }
+    server.src.lib.jshost ++> "server/src/lib/served-model" { NULL, sub }
     server.src.lib.jshost ++> "server/src/lib/endpoint-scope" { NULL, sub }
     server.src.lib.jshost ++> server.src.lib.guardrails { NULL, plain }
     server.src.lib.jshost ++> "server/src/lib/key-proxy" { NULL, plain, rx, sub }

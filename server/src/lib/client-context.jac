@@ -5,11 +5,10 @@ import from "node:process" { default as process }
 # every path that logs a request.
 type ClientContext = any;
 
-glob:priv storage: any = new(AsyncLocalStorage),
-          NULL: any = globalThis.JSON.parse("null");
+glob:priv storage: any = new(AsyncLocalStorage);
 
 def:priv context(ip: any = NULL, userAgent: any = NULL, agent: any = NULL) -> any {
-    return globalThis.Object.fromEntries([("ip", ip), ("userAgent", userAgent), ("agent", agent)]);
+    return plain(ip=ip, userAgent=userAgent, agent=agent);
 }
 
 # REQUEST_ANALYTICS_LOG_CLIENT=false stores nulls. It is read per request. With
@@ -24,7 +23,7 @@ def clientContextMiddleware(req: any, _res: any, next: any) {
     ip: any = getattr(req, "ip", None) ?? getattr(req.socket, "remoteAddress", None);
     storage.run(
         context(
-            ip.replace(new(globalThis.RegExp, "^::ffff:", "i"), "") if ip else NULL,
+            sub(ip, "^::ffff:", "", "i") if ip else NULL,
             ua.slice(0, 256) if isinstance(ua, str) else NULL,
             classifyClientAgent(req),
         ),

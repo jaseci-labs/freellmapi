@@ -33,7 +33,7 @@ def:priv tick {
     now = globalThis.Date.now();
     drift = now - lastTickAt - TICK_MS;
     if lastTickAt > 0 and drift > 30000 {
-        invokeHooks(globalThis.Object.fromEntries([("reason", "drift"), ("idleMs", drift)]));
+        invokeHooks(plain(reason="drift", idleMs=drift));
     }
     lastTickAt = now;
     schedule();
@@ -41,9 +41,7 @@ def:priv tick {
 
 def:priv handleSignal(name: str) {
     idle = max(0, globalThis.Date.now() - lastTickAt - TICK_MS) if lastTickAt > 0 else 0;
-    invokeHooks(
-        globalThis.Object.fromEntries([("reason", "signal"), ("idleMs", idle), ("signal", name)])
-    );
+    invokeHooks(plain(reason="signal", idleMs=idle, signal=name));
     lastTickAt = globalThis.Date.now();
 }
 

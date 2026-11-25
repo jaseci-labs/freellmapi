@@ -2,8 +2,7 @@ import from "crypto" { default as crypto }
 
 # Uppercase letters and digits without the look-alikes (I, O, 0, 1), so a code
 # is easy to read from a terminal log and type by hand.
-glob:priv ALPHABET: str = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789",
-          NULL: any = globalThis.JSON.parse("null");
+glob:priv ALPHABET: str = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 obj OneTimeCode {
     has current: any = NULL;

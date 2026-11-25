@@ -14,7 +14,7 @@ type RequestTrace = any;
 glob:priv storage: any = new(AsyncLocalStorage);
 
 def newRequestTrace -> any {
-    return globalThis.JSON.parse('{"records": [], "lastRequestRowId": null}');
+    return plain(records=[], lastRequestRowId=NULL);
 }
 
 def runWithRequestTrace(trace: any, fn: any) -> any {

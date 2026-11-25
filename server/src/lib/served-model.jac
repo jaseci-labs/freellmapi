@@ -4,21 +4,16 @@
 # takes the raw upstream value from before the overwrite and, where it differs
 # beyond spelling, logs it once per (platform, requested, served) and returns
 # it for requests.served_model. Callers still see the routed model.
-glob:priv NULL: any = globalThis.JSON.parse("null"),
-          PLACEHOLDERS: list[str] = ["", "default", "unknown"],
+glob:priv PLACEHOLDERS: list[str] = ["", "default", "unknown"],
           observed: set[str] = set();
 
 # Cosmetic differences: case, one trailing tier tag (":free"), the namespace
 # before the last '/', and separator runs (as model-groups' normalizeGroupKey).
 def normalizeModelIdForDrift(id: any) -> str {
     s: any = globalThis.String(id ?? "").trim().toLowerCase();
-    s = globalThis.String.prototype.replace.call(
-        s, new(globalThis.RegExp, ":(free|beta|extended|nitro|standard)$"), ""
-    );
+    s = sub(s, ":(free|beta|extended|nitro|standard)$", "");
     s = s.slice(s.lastIndexOf("/") + 1);
-    return globalThis.String.prototype.replace.call(
-        s, new(globalThis.RegExp, "[\\s_-]+", "g"), "-"
-    ).trim();
+    return sub(s, "[\\s_-]+", "-", "g").strip();
 }
 
 def resetServedModelObservations {

@@ -33,10 +33,6 @@ glob:priv CODE_MARKERS: list[any] = [
     rx("\\bTraceback\\s+\\(most recent call last\\)"),
 ];
 
-def:priv rx(pattern: str, flags: str = "") -> any {
-    return new(globalThis.RegExp, pattern, flags);
-}
-
 def parseTaskTypeHeader(req: any) -> str {
     raw: any = req.headers[TASK_TYPE_HEADER];
     value: any = raw[0] if globalThis.Array.isArray(raw) else raw;

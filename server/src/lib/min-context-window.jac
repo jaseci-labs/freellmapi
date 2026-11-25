@@ -4,14 +4,9 @@
 # no restart, and a garbage value disables the gate rather than empty the pool.
 glob MIN_CONTEXT_WINDOW_SETTING: str = "min_context_window",
      # '1m' is the 1,048,576 the largest catalog rows advertise.
-     MIN_CONTEXT_WINDOW_PRESETS: any = globalThis.Object.fromEntries([
-         ("32k", 32768),
-         ("128k", 131072),
-         ("512k", 524288),
-         ("1m", 1048576),
-     ]);
-
-glob:priv NULL: any = globalThis.JSON.parse("null");
+     MIN_CONTEXT_WINDOW_PRESETS: any = plain(
+         **{"32k": 32768, "128k": 131072, "512k": 524288, "1m": 1048576}
+     );
 
 # The floor in tokens, or null when it is off, unset or the DB is not ready.
 def minContextWindowFloor -> any {

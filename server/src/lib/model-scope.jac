@@ -1,8 +1,6 @@
 # Per-key model scope (#657): api_keys.model_scope_json is an optional JSON
 # array of model ids, and a scoped key serves no model outside it. An empty or
 # corrupt value is unscoped (null), so that it never benches the key.
-glob:priv NULL: any = globalThis.JSON.parse("null");
-
 def parseModelScope(json: any = None) -> any {
     try {
         raw: any = globalThis.JSON.parse(json or "null");
