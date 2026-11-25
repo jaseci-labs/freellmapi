@@ -21,7 +21,7 @@ def clientContextMiddleware(req: any, _res: any, next: any) {
         return;
     }
     ua: any = req.headers["user-agent"];
-    ip: any = req.ip ?? req.socket.remoteAddress;
+    ip: any = getattr(req, "ip", None) ?? getattr(req.socket, "remoteAddress", None);
     storage.run(
         context(
             ip.replace(new(globalThis.RegExp, "^::ffff:", "i"), "") if ip else NULL,
