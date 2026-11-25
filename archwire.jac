@@ -2188,11 +2188,7 @@ graph import {
         ServerLogLevel,
         recordConsoleLine,
     }
-    "server/src/lib/client-classifier" --> "server/src/lib/client-context" {
-        ClientAgent,
-        classifyClientAgent,
-    }
-    server.src.services.scoring --> "server/src/lib/client-context" { PresetStrategy }
+    "server/src/lib/client-classifier" ++> "server/src/lib/client-context" { classifyClientAgent }
     server.src.providers.base --> server.src.providers.speechflow {
         BaseProvider,
         KeyValidationResult,
@@ -2646,7 +2642,7 @@ graph import {
     server.src.db.index --> "server/src/services/keyless-defaults" { getDb, getSetting, setSetting }
     server.src.lib.crypto --> "server/src/services/keyless-defaults" { encrypt }
     server.src.providers.index --> "server/src/services/keyless-defaults" { getAllProviders }
-    server.src.db.index --> "server/src/lib/min-context-window" { getSetting }
+    server.src.db.index ++> "server/src/lib/min-context-window" { getSetting }
     server.src.db.index --> "server/src/services/model-groups" { getDb, getSetting, setSetting }
     "server/src/lib/endpoint-scope" --> "server/src/services/model-groups" {
         ENDPOINT_ID_SEPARATOR,
@@ -2654,7 +2650,7 @@ graph import {
         groupRefMatches,
         qualifiedModelMemberId,
     }
-    "server/src/lib/endpoint-scope" --> "server/src/lib/tool-capability" { modelStatsKey }
+    "server/src/lib/endpoint-scope" ++> "server/src/lib/tool-capability" { modelStatsKey }
     "server/src/services/key-budget" --> "server/src/lib/fallback-loop" { nextMonthResetAt }
     "server/src/services/cloudflare-daily-quota" --> "server/src/lib/fallback-loop" {
         benchCloudflareAccount,
@@ -2766,7 +2762,6 @@ graph import {
     "server/src/lib/endpoint-scope" --> "server/src/services/model-retirement" { modelStatsKey }
     "server/src/lib/server-logs" --> "server/src/services/model-retirement" { providerLog }
     server.src.db.index --> server.src.lib.guardrails { getSetting }
-    "server/src/lib/fallback-loop" --> "server/src/lib/attempt-trace" { AttemptErrorClass }
     server.src.db.index --> "server/src/lib/request-log" { getDb }
     "server/src/services/request-retention" --> "server/src/lib/request-log" {
         pruneRequestAnalytics,
