@@ -40,3 +40,4 @@ monetization/
 /shared/package.json
 /shared/package-lock.json
 /shared/node_modules/
+/.jac/

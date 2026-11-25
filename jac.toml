@@ -249,3 +249,6 @@ exclude = ["desktop"]
 
 [spaces.client.ui]
 plugin = "react"
+
+[check.lint]
+select = ["style"]
