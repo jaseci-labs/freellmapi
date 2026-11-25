@@ -32,7 +32,7 @@ def:priv resolveModelDbId(db: any, platform: str, modelId: str, keyId: any) -> a
     }
     row = db.prepare(
         "SELECT id FROM models WHERE platform = ? AND model_id = ? AND endpoint_scope = ? LIMIT 1"
-    ).get("custom", modelId, sub(key.base_url.trim(), "\\/+$", ""));
+    ).get("custom", modelId, sub(globalThis.String.prototype.trim.call(key.base_url), "\\/+$", ""));
     return row.id if row else NULL;
 }
 

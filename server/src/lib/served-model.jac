@@ -9,10 +9,16 @@ glob:priv PLACEHOLDERS: list[str] = ["", "default", "unknown"],
 
 # Cosmetic differences: case, one trailing tier tag (":free"), the namespace
 # before the last '/', and separator runs (as model-groups' normalizeGroupKey).
+# JavaScript's string methods are called through String.prototype: on a value
+# typed any, s.trim() is a dynamic call through the runtime, 20x the cost.
 def normalizeModelIdForDrift(id: any) -> str {
-    s: any = globalThis.String("" if missing(id) else id).trim().toLowerCase();
+    s: any = globalThis.String.prototype.toLowerCase.call(
+        globalThis.String.prototype.trim.call(globalThis.String("" if missing(id) else id))
+    );
     s = sub(s, ":(free|beta|extended|nitro|standard)$", "");
-    s = s.slice(s.lastIndexOf("/") + 1);
+    s = globalThis.String.prototype.slice.call(
+        s, globalThis.String.prototype.lastIndexOf.call(s, "/") + 1
+    );
     return sub(s, "[\\s_-]+", "-", "g").strip();
 }
 
@@ -27,9 +33,9 @@ def observeServedModel(opts: any) -> any {
     if not isinstance(served, str) {
         return NULL;
     }
-    served = served.trim();
+    served = globalThis.String.prototype.trim.call(served);
     requested: str = opts.requestedModel;
-    if served.toLowerCase() in PLACEHOLDERS
+    if globalThis.String.prototype.toLowerCase.call(served) in PLACEHOLDERS
         or normalizeModelIdForDrift(requested) == normalizeModelIdForDrift(served)
     {
         return NULL;
