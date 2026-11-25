@@ -18,6 +18,9 @@ graph spaces {
 }
 
 graph import {
+    server.src.lib.jshost ++> "server/src/lib/system-prompt" { NULL, missing, plain }
+    server.src.lib.jshost ++> "server/src/lib/custom-provider-cleanup" { missing }
+    server.src.lib.jshost ++> "server/src/lib/process-safety-net" { missing }
     server.src.lib.jshost ++> server.src.lib.config { NULL, plain }
     server.src.lib.jshost ++> "server/src/lib/ttfb-budget" { NULL, plain, rx }
     server.src.lib.jshost ++> "server/src/lib/model-scope" { NULL }
@@ -2982,7 +2985,7 @@ graph import {
     server.src.services.health --> server.src.services.rerank { markKeyHealthyFromRequest }
     "server/src/lib/client-context" --> server.src.services.rerank { getClientContext }
     server.src.lib.proxy --> server.src.services.rerank { proxyFetch }
-    server.src.db.index --> "server/src/lib/system-prompt" { getDb, getUnifiedApiKey }
+    server.src.db.index ++> "server/src/lib/system-prompt" { getDb, getUnifiedApiKey }
     server.src.db.index ++> "server/src/lib/system-date" { getSetting, setSetting }
     server.src.lib.content ++> "server/src/lib/system-date" { contentToString }
     server.src.lib.content ++> "server/src/lib/task-type" { contentToString }
@@ -3829,7 +3832,6 @@ graph import {
     server.src.services.ratelimit --> server.src.routes.models { recordRequest, recordTokens }
     "server/src/services/key-budget" --> server.src.routes.models { recordMonthlyUsage }
     server.src.lib.content --> server.src.routes.models { contentToString }
-    server.src.db.types --> "server/src/lib/custom-provider-cleanup" { Db }
     server.src.services.router --> server.src.routes.responses {
         ChainRow,
         ResolvedChain,
