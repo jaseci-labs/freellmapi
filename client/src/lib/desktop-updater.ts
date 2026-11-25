@@ -62,5 +62,3 @@ export function useDesktopUpdater() {
     install: () => updater.install().then(next => { setState(next); return next }),
   }
 }
-
-export type DesktopUpdater = NonNullable<ReturnType<typeof useDesktopUpdater>>

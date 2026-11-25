@@ -692,12 +692,3 @@ export interface QuotaOutlookResponse {
   minimumRequests: number;
   pools: QuotaOutlookPool[];
 }
-
-// ---- Provider Dashboard Types ----
-
-export interface ModelTestResult {
-  success: boolean;
-  modelId: string;
-  latencyMs: number;
-  error?: string;
-}

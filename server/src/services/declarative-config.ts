@@ -137,8 +137,6 @@ const declarativeConfigSchema = z.object({
   }).optional(),
 }).strict();
 
-export type DeclarativeConfig = z.infer<typeof declarativeConfigSchema>;
-
 export interface DeclarativeConfigResult {
   applied: boolean;
   source?: string;

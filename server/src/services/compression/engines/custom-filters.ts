@@ -42,8 +42,3 @@ export function loadCustomFilters(trustProjectFilters: boolean): ToolFilterRule[
   cached = filters.slice(0, 100);
   return cached;
 }
-
-export function _clearCustomFilterCacheForTesting(): void {
-  cacheKey = '';
-  cached = [];
-}

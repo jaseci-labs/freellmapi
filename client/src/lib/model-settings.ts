@@ -22,7 +22,6 @@ export const RANK_MAX = 1000
 // outside these ('' or a custom label) scores as tier 0 — "unknown", not worse
 // than the real tiers. Kept in sync with server/src/services/scoring.ts.
 export const SIZE_LABELS = ['Frontier', 'Large', 'Medium', 'Small'] as const
-export type SizeLabel = typeof SIZE_LABELS[number]
 
 // What the edit form binds to. Numbers are strings; a blank optional number
 // means "unset" (null on the wire).

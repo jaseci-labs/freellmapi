@@ -25,3 +25,18 @@ update-hermes.sh
 
 # Monetization planning — private, never committed
 monetization/
+/package.json
+/package-lock.json
+/node_modules/
+/cli/package.json
+/cli/package-lock.json
+/cli/node_modules/
+/client/package.json
+/client/package-lock.json
+/client/node_modules/
+/server/package.json
+/server/package-lock.json
+/server/node_modules/
+/shared/package.json
+/shared/package-lock.json
+/shared/node_modules/

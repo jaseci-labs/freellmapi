@@ -5,7 +5,8 @@ import { initDb, getDb, getUnifiedApiKey } from '../../db/index.js';
 import { addToActiveChain } from '../helpers/chain.js';
 import { encrypt } from '../../lib/crypto.js';
 import { setUnifyEnabled, setUnifyOverrides } from '../../services/model-groups.js';
-import { getRoutingStrategy, setRoutingStrategy, type RoutingStrategy } from '../../services/router.js';
+import { getRoutingStrategy, setRoutingStrategy } from '../../services/router.js';
+import type { RoutingStrategy } from '../../services/scoring.js';
 import { mintDashboardToken } from '../helpers/auth.js';
 
 // Anthropic-compatible Messages API (`POST /v1/messages`). These tests drive

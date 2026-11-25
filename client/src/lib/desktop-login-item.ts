@@ -11,11 +11,6 @@ function bridge(): DesktopLoginItemBridge | null {
   return (window as { __FREEAPI_LOGIN_ITEM__?: DesktopLoginItemBridge }).__FREEAPI_LOGIN_ITEM__ ?? null
 }
 
-/** True when this page runs in a desktop build that exposes the login-item bridge. */
-export function hasDesktopLoginItem(): boolean {
-  return bridge() !== null
-}
-
 /**
  * The OS-level "Start on system startup" flag. Returns `enabled: null` until
  * the first read resolves (and permanently in a browser, where there is no

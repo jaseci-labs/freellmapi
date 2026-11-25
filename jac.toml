@@ -1,0 +1,251 @@
+[npm."."]
+name = "@freellmapi/monorepo"
+private = true
+workspaces = ["shared", "server", "client", "cli"]
+
+[npm.".".scripts]
+dev = "concurrently --kill-others-on-fail --names server,client \"npm run dev -w server\" \"npm run dev -w client\""
+"dev:lan" = "concurrently --kill-others-on-fail --names server,client \"npm run dev -w server\" \"npm run dev -w client -- --host\""
+test = "npm run test:bootstrap && npm run test:hooks && npm run test -w server && npm run test -w cli && npm run test -w client --if-present"
+"test:bootstrap" = "node --test scripts/dev-bootstrap.test.mjs"
+"test:hooks" = "node --test .claude/hooks/contributing-check.test.mjs"
+build = "npm run build -w server && npm run build -w cli && npm run build -w client"
+lint = "npm run lint -w server && npm run lint -w cli"
+"build:server" = "npm run build -w server"
+"test:migrations" = "npm run test:migrations -w server"
+"desktop:dev" = "npm run build -w client && npm --prefix desktop run dev"
+"desktop:dist" = "npm run build -w client && npm --prefix desktop run dist"
+"desktop:dist:mac:x64" = "npm run build -w client && npm --prefix desktop run dist:mac:x64"
+"desktop:dist:win" = "npm run build -w client && npm --prefix desktop run dist:win"
+"desktop:dist:linux" = "npm run build -w client && npm --prefix desktop run dist:linux"
+"db:migration:up" = "npm run db:migration:up -w server"
+"db:migration:down" = "npm run db:migration:down -w server"
+"db:migration:fresh" = "npm run db:migration:fresh -w server"
+"db:migration:status" = "npm run db:migration:status -w server"
+"db:migration:create" = "npm run db:migration:create -w server"
+
+[npm.".".devDependencies]
+concurrently = "^9.1.2"
+jsdom = "^27.4.0"
+
+[npm.".".engines]
+node = ">=20.18.0 <25.0.0"
+npm = ">=10.0.0"
+
+[npm.".".allowScripts]
+"better-sqlite3@12.10.0" = true
+"esbuild@0.28.2" = true
+"msw@2.14.6" = true
+
+[test.npm."."]
+script = "test"
+
+[npm.cli]
+name = "freellmapi"
+version = "0.8.4"
+description = "Set up coding agents to use a FreeLLMAPI gateway"
+license = "MIT"
+repository = { type = "git", url = "git+https://github.com/tashfeenahmed/freellmapi.git", directory = "cli" }
+homepage = "https://github.com/tashfeenahmed/freellmapi/tree/main/cli#readme"
+bugs = { url = "https://github.com/tashfeenahmed/freellmapi/issues" }
+keywords = [
+    "freellmapi",
+    "llm",
+    "openai-compatible",
+    "claude-code",
+    "codex",
+    "aider",
+    "cline",
+    "coding-agent",
+    "cli",
+]
+type = "module"
+bin = { freellmapi = "dist/index.js" }
+exports = { "." = "./dist/index.js", "./tools" = "./dist/tools.js" }
+files = [
+    "README.md",
+    "LICENSE",
+    "dist/index.js",
+    "dist/index.d.ts",
+    "dist/config-files.js",
+    "dist/config-files.d.ts",
+    "dist/detect.js",
+    "dist/detect.d.ts",
+    "dist/doctor.js",
+    "dist/doctor.d.ts",
+    "dist/keys.js",
+    "dist/keys.d.ts",
+    "dist/models.js",
+    "dist/models.d.ts",
+    "dist/tools.js",
+    "dist/tools.d.ts",
+    "dist/types.js",
+    "dist/types.d.ts",
+    "tools.json",
+]
+
+[npm.cli.scripts]
+build = "tsc"
+test = "vitest run"
+lint = "eslint ."
+prepublishOnly = "npm run build && npm test"
+
+[npm.cli.engines]
+node = ">=20.18.0"
+
+[npm.cli.dependencies]
+cross-spawn = "^7.0.6"
+jsonc-parser = "^3.3.1"
+yaml = "^2.9.0"
+
+[npm.cli.devDependencies]
+"@types/cross-spawn" = "^6.0.6"
+"@types/node" = "^24.12.2"
+typescript = "~6.0.2"
+vitest = "^5.0.5"
+"@eslint/js" = "^9.39.4"
+eslint = "^9.39.4"
+globals = "^17.4.0"
+typescript-eslint = "^8.58.0"
+
+[test.npm.cli]
+script = "test"
+
+[npm.client]
+name = "@freellmapi/client"
+private = true
+version = "0.0.0"
+type = "module"
+
+[npm.client.scripts]
+dev = "vite"
+build = "tsc -b && vite build"
+lint = "eslint ."
+test = "vitest run && npm run check:i18n"
+"check:i18n" = "node scripts/check-i18n.mjs"
+preview = "vite preview"
+
+[npm.client.dependencies]
+"@base-ui/react" = "^1.3.0"
+"@dnd-kit/core" = "^6.3.1"
+"@dnd-kit/sortable" = "^10.0.0"
+"@dnd-kit/utilities" = "^3.2.2"
+"@fontsource-variable/geist" = "^5.2.8"
+"@fontsource-variable/geist-mono" = "^5.2.7"
+"@tailwindcss/vite" = "^4.2.2"
+"@tanstack/react-query" = "^5.97.0"
+class-variance-authority = "^0.7.1"
+clsx = "^2.1.1"
+"highlight.js" = "^11.12.0"
+liquid-gooey = "^0.2.1"
+lucide-react = "^1.8.0"
+react = "^19.2.4"
+react-dom = "^19.2.4"
+react-markdown = "^10.1.0"
+react-router-dom = "^7.14.0"
+recharts = "^3.8.1"
+remark-gfm = "^4.0.1"
+shadcn = "^4.2.0"
+simple-icons = "^16.31.0"
+tailwind-merge = "^3.5.0"
+tailwindcss = "^4.2.2"
+tw-animate-css = "^1.4.0"
+
+[npm.client.devDependencies]
+"@eslint/js" = "^9.39.4"
+"@types/node" = "^24.12.2"
+"@types/react" = "^19.2.14"
+"@types/react-dom" = "^19.2.3"
+"@vitejs/plugin-react" = "^6.0.1"
+eslint = "^9.39.4"
+eslint-plugin-react-hooks = "^7.0.1"
+eslint-plugin-react-refresh = "^0.5.2"
+globals = "^17.4.0"
+typescript = "~6.0.2"
+typescript-eslint = "^8.58.0"
+vite = "^8.0.4"
+vitest = "^5.0.5"
+
+[npm.client.engines]
+node = ">=20.18.0 <25.0.0"
+npm = ">=10.0.0"
+
+[test.npm.client]
+script = "test"
+
+[npm.server]
+name = "@freellmapi/server"
+version = "0.2.1"
+private = true
+type = "module"
+
+[npm.server.scripts]
+dev = "tsx watch src/index.ts"
+build = "tsc"
+start = "node dist/index.js"
+test = "vitest run --pool=forks --fileParallelism=false"
+"test:watch" = "vitest"
+"test:coverage" = "vitest run --pool=forks --fileParallelism=false --coverage"
+"test:migrations" = "vitest run --pool=forks --fileParallelism=false src/__tests__/db/migrate/roundtrip.test.ts"
+lint = "eslint ."
+export-catalog = "tsx src/scripts/export-catalog.ts"
+rotate-encryption-key = "tsx src/scripts/rotate-encryption-key.ts"
+"db:migration:up" = "tsx src/db/migrate/cli.ts up"
+"db:migration:down" = "tsx src/db/migrate/cli.ts down"
+"db:migration:fresh" = "tsx src/db/migrate/cli.ts fresh"
+"db:migration:status" = "tsx src/db/migrate/cli.ts status"
+"db:migration:create" = "tsx src/db/migrate/cli.ts create"
+
+[npm.server.dependencies]
+"@freellmapi/shared" = "*"
+ajv = "^8.20.0"
+compression = "^1.8.0"
+cors = "^2.8.5"
+dotenv = "^17.4.2"
+express = "^5.1.0"
+helmet = "^8.1.0"
+multer = "^2.2.0"
+openid-client = "^6.9.1"
+sharp = "^0.35.3"
+socks-proxy-agent = "^10.0.0"
+undici = "^6.21.0"
+zod = "^4.6.7"
+
+[npm.server.devDependencies]
+"@eslint/js" = "^9.39.4"
+"@types/better-sqlite3" = "^7.6.13"
+"@types/compression" = "^1.7.5"
+"@types/cors" = "^2.8.17"
+"@types/express" = "^5.0.2"
+"@types/multer" = "^2.1.0"
+"@types/node" = "^22.15.3"
+"@vitest/coverage-v8" = "^5.0.5"
+eslint = "^9.39.4"
+globals = "^17.4.0"
+tsx = "^4.19.4"
+typescript = "^5.8.3"
+typescript-eslint = "^8.58.0"
+vitest = "^5.0.5"
+
+[npm.server.engines]
+node = ">=20.18.0 <25.0.0"
+npm = ">=10.0.0"
+
+[npm.server.optionalDependencies]
+better-sqlite3 = "^12.10.0"
+
+[test.npm.server]
+script = "test"
+
+[npm.shared]
+name = "@freellmapi/shared"
+version = "0.1.0"
+private = true
+main = "./types.ts"
+types = "./types.ts"
+
+[project]
+exclude = ["desktop"]
+
+[spaces.client.ui]
+plugin = "react"

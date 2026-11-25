@@ -1371,5 +1371,3 @@ export const openapiSpec = {
     },
   },
 } as const;
-
-export type OpenApiSpec = typeof openapiSpec;

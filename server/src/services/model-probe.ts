@@ -48,12 +48,6 @@ export const MODEL_PROBE_INTERVAL_MS = 30 * 60 * 1000;
 // re-considered every pass.
 export const MODEL_PROBE_STALE_MS = 6 * 60 * 60 * 1000;
 
-// A model+key that served a real request within this window does not need a
-// probe: real success is stronger evidence, and the probe would only spend
-// free-tier quota to re-learn it. Mirrors the RECENT_CHECK_SKIP_MS idea from
-// the health pass.
-export const RECENT_SERVE_SKIP_MS = 60 * 60 * 1000;
-
 const DEFAULT_MAX_PROBES_PER_PASS = 3;
 
 // Ceiling for one probe request, mirroring health's transport posture. A probe
