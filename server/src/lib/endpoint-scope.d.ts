@@ -1,0 +1,11 @@
+import type { Db } from '../db/types.js';
+export declare function normalizeBaseUrl(raw: string): string;
+export declare function endpointScopeForBaseUrl(baseUrl: string | null | undefined): string;
+export declare function endpointScopeOfKey(db: Db, keyId: number | null | undefined): string;
+export declare function endpointHandle(scope: string): string;
+export declare function modelStatsKey(platform: string, modelId: string, endpointScope: string | null | undefined): string;
+export declare const ENDPOINT_ID_SEPARATOR = "#";
+export declare function qualifiedModelMemberId(platform: string, modelId: string, endpointScope: string | null | undefined): string | null;
+export declare function endpointRefMatches(requested: string, endpointScope: string): boolean;
+export declare function groupHandle(label: string): string;
+export declare function groupRefMatches(requested: string, groupLabel: string | null | undefined): boolean;

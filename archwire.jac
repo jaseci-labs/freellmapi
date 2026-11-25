@@ -18,6 +18,10 @@ graph spaces {
 }
 
 graph import {
+    server.src.lib.jshost ++> "server/src/lib/endpoint-scope" { NULL, sub }
+    server.src.lib.jshost ++> server.src.lib.guardrails { NULL, plain }
+    server.src.lib.jshost ++> "server/src/lib/key-proxy" { NULL, plain, rx, sub }
+    server.src.lib.jshost ++> "server/src/lib/system-date" { plain, rx }
     "cli/src/config-files" --> "cli/src/config-files.test" {
         applyGeneratedFile,
         applyGeneratedFiles,
@@ -2031,8 +2035,8 @@ graph import {
     }
     server.src.providers.base --> server.src.services.router { BaseProvider }
     server.src.db.types --> server.src.services.router { Db }
-    server.src.lib.crypto --> "server/src/lib/key-proxy" { decrypt, encrypt }
-    server.src.lib.proxy --> "server/src/lib/key-proxy" { PROXY_SCHEMES }
+    server.src.lib.crypto ++> "server/src/lib/key-proxy" { decrypt, encrypt }
+    server.src.lib.proxy ++> "server/src/lib/key-proxy" { PROXY_SCHEMES }
     server.src.db.index --> server.src.services.ratelimit { getDb, getSetting, setSetting }
     "server/src/lib/url-guard" --> server.src.services.ratelimit { isLoopbackOrPrivateUrl }
     "server/src/lib/model-scope" --> server.src.services.ratelimit { parseModelScope, scopeAllows }
@@ -2325,7 +2329,6 @@ graph import {
     server.src.lib.crypto --> "server/src/services/custom-endpoint" { decrypt, encrypt }
     server.src.db.types --> "server/src/services/custom-endpoint" { Db }
     server.src.db.types --> "server/src/services/custom-model-tombstone" { Db }
-    server.src.db.types --> "server/src/lib/endpoint-scope" { Db }
     server.src.providers.base --> server.src.providers.speechify {
         BaseProvider,
         KeyValidationResult,
@@ -2761,7 +2764,7 @@ graph import {
     }
     "server/src/lib/endpoint-scope" --> "server/src/services/model-retirement" { modelStatsKey }
     "server/src/lib/server-logs" --> "server/src/services/model-retirement" { providerLog }
-    server.src.db.index --> server.src.lib.guardrails { getSetting }
+    server.src.db.index ++> server.src.lib.guardrails { getSetting }
     server.src.db.index --> "server/src/lib/request-log" { getDb }
     "server/src/services/request-retention" --> "server/src/lib/request-log" {
         pruneRequestAnalytics,
@@ -2967,8 +2970,8 @@ graph import {
     "server/src/lib/client-context" --> server.src.services.rerank { getClientContext }
     server.src.lib.proxy --> server.src.services.rerank { proxyFetch }
     server.src.db.index --> "server/src/lib/system-prompt" { getDb, getUnifiedApiKey }
-    server.src.db.index --> "server/src/lib/system-date" { getSetting, setSetting }
-    server.src.lib.content --> "server/src/lib/system-date" { contentToString }
+    server.src.db.index ++> "server/src/lib/system-date" { getSetting, setSetting }
+    server.src.lib.content ++> "server/src/lib/system-date" { contentToString }
     server.src.lib.content ++> "server/src/lib/task-type" { contentToString }
     server.src.lib.content --> "server/src/services/context-handoff" { contentToString }
     server.src.services.router --> server.src.services.fusion {
