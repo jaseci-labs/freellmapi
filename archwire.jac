@@ -18,7 +18,8 @@ graph spaces {
 }
 
 graph import {
-    server.src.lib.jshost ++> "server/src/lib/file-permissions" { NULL, plain, rx }
+    server.src.lib.jshost ++> "server/src/lib/tool-validate" { NULL, plain }
+    server.src.lib.jshost ++> "server/src/lib/anthropic-documents" { plain, sub }
     server.src.lib.jshost ++> "server/src/lib/request-log" { NULL, missing, plain, sub }
     server.src.lib.jshost ++> "server/src/lib/system-prompt" { NULL, missing, plain }
     server.src.lib.jshost ++> "server/src/lib/custom-provider-cleanup" { missing }
@@ -2295,7 +2296,7 @@ graph import {
         bearerAuthHeader,
         isAnonymousCredential,
     }
-    server.src.db.index --> "server/src/lib/tool-validate" { getSetting }
+    server.src.db.index ++> "server/src/lib/tool-validate" { getSetting }
     "server/src/providers/openai-compat" --> "server/src/services/model-discovery" {
         OpenAICompatProvider,
     }
