@@ -18,6 +18,8 @@ graph spaces {
 }
 
 graph import {
+    server.src.lib.jshost ++> server.src.lib.config { NULL, plain }
+    server.src.lib.jshost ++> "server/src/lib/ttfb-budget" { NULL, plain, rx }
     server.src.lib.jshost ++> "server/src/lib/model-scope" { NULL }
     server.src.lib.jshost ++> "server/src/lib/min-context-window" { NULL, plain }
     server.src.lib.jshost ++> "server/src/lib/output-cap" { NULL, rx }
@@ -30,7 +32,7 @@ graph import {
     server.src.lib.jshost ++> "server/src/lib/attempt-trace" { NULL, plain }
     server.src.lib.jshost ++> "server/src/lib/served-model" { NULL, sub }
     server.src.lib.jshost ++> "server/src/lib/endpoint-scope" { NULL, sub }
-    server.src.lib.jshost ++> server.src.lib.guardrails { NULL, plain }
+    server.src.lib.jshost ++> server.src.lib.guardrails { NULL, missing, plain }
     server.src.lib.jshost ++> "server/src/lib/key-proxy" { NULL, plain, rx, sub }
     server.src.lib.jshost ++> "server/src/lib/system-date" { plain, rx }
     "cli/src/config-files" --> "cli/src/config-files.test" {
@@ -2200,8 +2202,8 @@ graph import {
     "server/src/lib/log-redaction" --> "server/src/lib/server-logs" { redactSecrets }
     server.src.db.types --> "server/src/lib/server-logs" { Db }
     "server/src/lib/server-logs" --> "server/src/lib/log-redaction" {
-        ServerLogLevel,
         recordConsoleLine,
+        ServerLogLevel,
     }
     "server/src/lib/client-classifier" ++> "server/src/lib/client-context" { classifyClientAgent }
     server.src.providers.base --> server.src.providers.speechflow {
@@ -2787,8 +2789,8 @@ graph import {
         noteRequestRowId,
     }
     server.src.db.index --> "server/src/services/request-retention" { getDb }
-    server.src.db.index --> "server/src/lib/ttfb-budget" { Db, getDb }
-    "server/src/lib/endpoint-scope" --> "server/src/lib/ttfb-budget" { endpointScopeForBaseUrl }
+    server.src.db.index ++> "server/src/lib/ttfb-budget" { getDb }
+    "server/src/lib/endpoint-scope" ++> "server/src/lib/ttfb-budget" { endpointScopeForBaseUrl }
     "server/src/lib/endpoint-scope" ++> "server/src/lib/output-cap" { modelStatsKey }
     "server/src/services/specialist-text" --> server.src.routes.proxy {
         listSpecialists,

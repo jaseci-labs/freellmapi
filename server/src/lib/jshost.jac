@@ -17,3 +17,8 @@ def rx(pattern: str, flags: str = "") -> any {
 def plain(**fields: any) -> any {
     return globalThis.Object.fromEntries(fields.items());
 }
+
+# JavaScript's `x == null`: undefined or null.
+def missing(value: any) -> bool {
+    return value is None or value is NULL;
+}

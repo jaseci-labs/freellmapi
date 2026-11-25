@@ -46,15 +46,14 @@ def getMaxConsecutiveUpstreamFails -> float {
 
 def applyTokenBudget(estimatedInputTokens: float, maxTokens: any = None) -> any {
     budget = getRequestMaxTokensBudget();
-    total = estimatedInputTokens + (maxTokens ?? 0);
-    rejected = plain(budget=budget, estimatedTotal=total);
+    total = estimatedInputTokens + (0 if missing(maxTokens) else maxTokens);
     if budget <= 0 {
         return plain(rejection=NULL, maxTokens=maxTokens);
     }
-    if total > budget or (maxTokens is None and budget - estimatedInputTokens < 1) {
-        return plain(rejection=rejected, maxTokens=maxTokens);
+    if total > budget or (missing(maxTokens) and budget - estimatedInputTokens < 1) {
+        return plain(rejection=plain(budget=budget, estimatedTotal=total), maxTokens=maxTokens);
     }
-    if maxTokens is None {
+    if missing(maxTokens) {
         maxTokens = min(budget - estimatedInputTokens, TOKEN_BUDGET_OUTPUT_CAP);
     }
     return plain(rejection=NULL, maxTokens=maxTokens);
