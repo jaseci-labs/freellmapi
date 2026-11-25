@@ -18,6 +18,8 @@ graph spaces {
 }
 
 graph import {
+    server.src.lib.jshost ++> "server/src/lib/file-permissions" { NULL, plain, rx }
+    server.src.lib.jshost ++> "server/src/lib/request-log" { NULL, missing, plain, sub }
     server.src.lib.jshost ++> "server/src/lib/system-prompt" { NULL, missing, plain }
     server.src.lib.jshost ++> "server/src/lib/custom-provider-cleanup" { missing }
     server.src.lib.jshost ++> "server/src/lib/process-safety-net" { missing }
@@ -2778,16 +2780,13 @@ graph import {
     "server/src/lib/endpoint-scope" --> "server/src/services/model-retirement" { modelStatsKey }
     "server/src/lib/server-logs" --> "server/src/services/model-retirement" { providerLog }
     server.src.db.index ++> server.src.lib.guardrails { getSetting }
-    server.src.db.index --> "server/src/lib/request-log" { getDb }
-    "server/src/services/request-retention" --> "server/src/lib/request-log" {
+    server.src.db.index ++> "server/src/lib/request-log" { getDb }
+    "server/src/services/request-retention" ++> "server/src/lib/request-log" {
         pruneRequestAnalytics,
     }
-    "server/src/services/budget-alerts" --> "server/src/lib/request-log" { noteBudgetAlerts }
-    "server/src/lib/client-context" --> "server/src/lib/request-log" { getClientContext }
-    "server/src/lib/attempt-trace" --> "server/src/lib/request-log" {
-        RequestTrace,
-        noteRequestRowId,
-    }
+    "server/src/services/budget-alerts" ++> "server/src/lib/request-log" { noteBudgetAlerts }
+    "server/src/lib/client-context" ++> "server/src/lib/request-log" { getClientContext }
+    "server/src/lib/attempt-trace" ++> "server/src/lib/request-log" { noteRequestRowId }
     server.src.db.index --> "server/src/services/request-retention" { getDb }
     server.src.db.index ++> "server/src/lib/ttfb-budget" { getDb }
     "server/src/lib/endpoint-scope" ++> "server/src/lib/ttfb-budget" { endpointScopeForBaseUrl }
