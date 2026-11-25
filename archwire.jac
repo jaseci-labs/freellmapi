@@ -18,6 +18,7 @@ graph spaces {
 }
 
 graph import {
+    server.src.lib.jshost ++> "server/src/routes/client-profiles" { NULL, plain }
     server.src.lib.jshost ++> server.src.services.auth { NULL, missing, plain }
     server.src.lib.jshost ++> "server/src/services/model-retirement" { plain }
     server.src.lib.jshost ++> "server/src/lib/tool-validate" { NULL, plain }
@@ -3766,9 +3767,9 @@ graph import {
     "server/src/lib/endpoint-scope" --> "server/src/services/custom-media-register" {
         endpointScopeOfKey,
     }
-    server.src.db.index --> "server/src/routes/client-profiles" { getDb }
-    server.src.lib.crypto --> "server/src/routes/client-profiles" { decrypt, encrypt, maskKey }
-    "server/src/lib/system-prompt" --> "server/src/routes/client-profiles" {
+    server.src.db.index ++> "server/src/routes/client-profiles" { getDb }
+    server.src.lib.crypto ++> "server/src/routes/client-profiles" { decrypt, encrypt, maskKey }
+    "server/src/lib/system-prompt" ++> "server/src/routes/client-profiles" {
         hashClientProfileKey,
         mintClientProfileKey,
     }
