@@ -56,9 +56,18 @@ uses copies of both Jac trees in `/tmp`, so they sit at the same path depth (see
 | `POST /v1/messages` µs/req | 2608 | 2727 | 2646 | 1.05x | 1.01x |
 | `GET /api/auth/me` µs/req | 302 | 365 | 334 | 1.21x | 1.10x |
 | chat, 16 concurrent, req/s | 416 | 381 | 403 | 0.92x | 0.97x |
+| **Run C**, final commit, original vs Jac only, load 6.1–8.2 | | | | | |
+| `POST /v1/chat/completions` µs/req | 2680 | – | 2813 | – | 1.05x |
+| `POST /v1/chat/completions` stream µs/req | 2541 | – | 2765 | – | 1.09x |
+| `POST /v1/messages` µs/req | 2437 | – | 2588 | – | 1.06x |
+| `GET /api/auth/me` µs/req | 290 | – | 336 | – | 1.16x |
+| chat, 16 concurrent, req/s | 430 | – | 407 | – | 0.95x |
 
-`GET /api/ping` (no Jac on its path) varied from 0.82x to 0.97x between runs. That is about the
-size of the noise.
+`GET /api/ping` (no Jac on its path) varied from 0.82x to 1.01x between runs. That is about the
+size of the noise. Runs A and B measured the code before `ca6b062`, which saves about 2 µs a request
+in the served-model check. Run C measured the final commit. The same build lands 5–10% apart from
+run to run against the original, so the honest reading is that chat and messages are now within
+about 0–9% of the original, where they were 5–12% slower before this work.
 
 ### Start-up
 
@@ -123,8 +132,9 @@ calls it, on a file database (`perf/micro.mts`). Medians of 3 alternated runs, l
 original alone at load 7–9 (original 0.46 and 1.76 µs in those runs).
 
 Summed over one chat request, the Jac's cost above the TypeScript went from about 170 µs to about
-64 µs. At 2.3–2.7 ms a request, that is the move from 1.05–1.12x to 0.93–1.05x in the endpoint
-tables.
+64 µs. At 2.3–2.7 ms a request, the remaining 64 µs is 2–3% and the 106 µs saved about 4%. That is
+consistent with the endpoint tables moving from 1.05–1.12x to 0.93–1.09x. The run-to-run noise is
+about as large as the change.
 
 ## Why the Jac was slower, and what changed
 
