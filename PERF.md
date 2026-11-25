@@ -109,15 +109,18 @@ calls it, on a file database (`perf/micro.mts`). Medians of 3 alternated runs, l
 | `getEndpointTimeBudgetMs` (per attempt) | 21.1 | 36.5 | 29.5 | 1.7x | 1.4x |
 | `applyTokenBudget` (1) | 7.2 | 13.9 | 10.5 | 1.9x | 1.5x |
 | `newBreaker` + `recordBreakerFailure` | 8.3 | 14.7 | 11.7 | 1.8x | 1.4x |
-| `observeServedModel` (1) | 0.34 | 4.22 | 4.04 | 12x | 12x |
+| `observeServedModel` (1) | 0.34 | 4.22 | 2.18 ¹ | 12x | 5x |
 | `routeOutputBudget` (1) | 0.03 | 1.21 | 1.21 | 37x | 37x |
 | `prependSystemPrompt` | 0.10 | 0.91 | 0.73 | 9x | 7x |
-| `summarizeAttemptError` (on failure) | 1.76 | 3.45 | 3.44 | 2.0x | 1.9x |
+| `summarizeAttemptError` (on failure) | 1.76 | 3.45 | 3.03 ¹ | 2.0x | 1.7x |
 | `validateToolArguments` (with tools) | 0.26 | 2.81 | 1.85 | 11x | 7x |
 | `stableStringify` (with tools) | 1.37 | 23.60 | 5.72 | 17x | 4.2x |
 | `convertDocumentBlock` (document blocks) | 1.39 | 7.56 | 5.35 | 5.4x | 3.8x |
 | `validateSession` (each dashboard request) | 21.7 | 36.3 | 30.1 | 1.7x | 1.4x |
 | `loadConfig` (once) | 2.4 | 14.6 | 6.0 | 6.1x | 2.5x |
+
+¹ After the last commit (`String.prototype` calls), measured as 3 alternated runs against the
+original alone at load 7–9 (original 0.46 and 1.76 µs in those runs).
 
 Summed over one chat request, the Jac's cost above the TypeScript went from about 170 µs to about
 64 µs. At 2.3–2.7 ms a request, that is the move from 1.05–1.12x to 0.93–1.05x in the endpoint
@@ -156,6 +159,12 @@ request:
 - **`deriveTaskType`, system-date's checks, `stableStringify`, anthropic-documents' text join and
   ttfb-budget's `readConfig`** used comprehensions, `any()` over generators, `reversed(list(...))`,
   a nested `def` and a dict comprehension. They are now loops and module functions.
+- **JavaScript's string methods on values typed `any`** (`trim`, `toLowerCase`, `slice`,
+  `lastIndexOf`, `trimEnd`) are called as `globalThis.String.prototype.trim.call(s)`. That compiles
+  to the JavaScript call itself, while `s.trim()` goes through `callattr`, which has no method of
+  its own for these and takes its generic path. Lengths and slices stay in UTF-16 units, as in the
+  TypeScript; a Jac `str`'s `len()` and `[:n]` count code points, which would cut long error
+  messages at a different place. This is in served-model, error-redaction and request-log.
 - **error-redaction** reads its pattern table as a typed `list[tuple[any, str]]` by index. That
   compiles to plain `[0]`/`[1]`, where a list typed `list[any]` goes through `getitem` and
   unpacking goes through the runtime. This only gets back to the starting cost: an earlier indexed
