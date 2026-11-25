@@ -275,6 +275,12 @@ This is why one-line functions like `routeOutputBudget` (0.03 → 1.21 µs) and 
 stay 7–40x their TypeScript, though they are a small absolute cost. Nothing in a Jac source selects
 a cheaper face. That is why `4e84fc1` returned the router's per-candidate helpers to TypeScript.
 
+The face's cost grows with its arguments. `from_js` walks each array argument and every array
+inside it, so a function taking the request's `messages` pays for the conversation's length on every
+call. Profiled with only the default `off` mode's setting read, `maybeInjectSystemDate` (11.4 µs vs
+7.1 µs) and `validateSession` (30 µs vs 22 µs) spend nearly all of their excess in the face (`run`,
+`from_js`) and the runtime's dispatch, not in code the Jac source controls.
+
 ### 4. The boot module loads every Jac module of the space
 
 Every forwarder imports the space's `__boot.mjs`, which imports all 23 Jac modules and so their
