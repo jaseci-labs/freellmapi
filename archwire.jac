@@ -2969,7 +2969,7 @@ graph import {
     server.src.db.index --> "server/src/lib/system-prompt" { getDb, getUnifiedApiKey }
     server.src.db.index --> "server/src/lib/system-date" { getSetting, setSetting }
     server.src.lib.content --> "server/src/lib/system-date" { contentToString }
-    server.src.lib.content --> "server/src/lib/task-type" { contentToString }
+    server.src.lib.content ++> "server/src/lib/task-type" { contentToString }
     server.src.lib.content --> "server/src/services/context-handoff" { contentToString }
     server.src.services.router --> server.src.services.fusion {
         FusionCandidate,
