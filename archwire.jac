@@ -4470,8 +4470,8 @@ graph import {
         stampSessionReauthenticated,
     }
     "server/src/lib/setup-code" --> server.src.services.oidc { clearSetupCode }
-    "server/src/lib/one-time-code" --> "server/src/lib/setup-code" { createOneTimeCode }
-    "server/src/lib/one-time-code" --> "server/src/lib/reset-code" { createOneTimeCode }
+    "server/src/lib/one-time-code" ++> "server/src/lib/setup-code" { createOneTimeCode }
+    "server/src/lib/one-time-code" ++> "server/src/lib/reset-code" { createOneTimeCode }
     server.src.docs.openapi --> server.src.routes.docs { openapiSpec }
     "server/src/docs/docs-page" --> server.src.routes.docs { DOCS_HTML }
     server.src.db.index --> server.src.routes.status {
