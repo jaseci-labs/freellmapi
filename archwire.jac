@@ -23,20 +23,14 @@ graph import {
     server.src.lib.jshost ++> "server/src/lib/process-safety-net" { missing }
     server.src.lib.jshost ++> server.src.lib.config { NULL, plain }
     server.src.lib.jshost ++> "server/src/lib/ttfb-budget" { NULL, plain, rx }
-    server.src.lib.jshost ++> "server/src/lib/model-scope" { NULL }
-    server.src.lib.jshost ++> "server/src/lib/min-context-window" { NULL, plain }
     server.src.lib.jshost ++> "server/src/lib/output-cap" { NULL, missing, rx }
-    server.src.lib.jshost ++> "server/src/lib/client-context" { NULL, plain, sub }
     server.src.lib.jshost ++> "server/src/lib/error-redaction" { missing, rx }
     server.src.lib.jshost ++> "server/src/lib/one-time-code" { NULL }
     server.src.lib.jshost ++> "server/src/lib/task-type" { rx }
-    server.src.lib.jshost ++> "server/src/lib/provider-timeout" { sub }
     server.src.lib.jshost ++> "server/src/lib/wake-detect" { plain }
     server.src.lib.jshost ++> "server/src/lib/attempt-trace" { NULL, plain }
     server.src.lib.jshost ++> "server/src/lib/served-model" { NULL, missing, sub }
-    server.src.lib.jshost ++> "server/src/lib/endpoint-scope" { NULL, sub }
     server.src.lib.jshost ++> server.src.lib.guardrails { NULL, missing, plain }
-    server.src.lib.jshost ++> "server/src/lib/key-proxy" { NULL, plain, rx, sub }
     server.src.lib.jshost ++> "server/src/lib/system-date" { plain, rx }
     "cli/src/config-files" --> "cli/src/config-files.test" {
         applyGeneratedFile,
@@ -2051,8 +2045,8 @@ graph import {
     }
     server.src.providers.base --> server.src.services.router { BaseProvider }
     server.src.db.types --> server.src.services.router { Db }
-    server.src.lib.crypto ++> "server/src/lib/key-proxy" { decrypt, encrypt }
-    server.src.lib.proxy ++> "server/src/lib/key-proxy" { PROXY_SCHEMES }
+    server.src.lib.crypto --> "server/src/lib/key-proxy" { decrypt, encrypt }
+    server.src.lib.proxy --> "server/src/lib/key-proxy" { PROXY_SCHEMES }
     server.src.db.index --> server.src.services.ratelimit { getDb, getSetting, setSetting }
     "server/src/lib/url-guard" --> server.src.services.ratelimit { isLoopbackOrPrivateUrl }
     "server/src/lib/model-scope" --> server.src.services.ratelimit { parseModelScope, scopeAllows }
@@ -2208,7 +2202,10 @@ graph import {
         recordConsoleLine,
         ServerLogLevel,
     }
-    "server/src/lib/client-classifier" ++> "server/src/lib/client-context" { classifyClientAgent }
+    "server/src/lib/client-classifier" --> "server/src/lib/client-context" {
+        classifyClientAgent,
+        ClientAgent,
+    }
     server.src.providers.base --> server.src.providers.speechflow {
         BaseProvider,
         KeyValidationResult,
@@ -2661,7 +2658,7 @@ graph import {
     server.src.db.index --> "server/src/services/keyless-defaults" { getDb, getSetting, setSetting }
     server.src.lib.crypto --> "server/src/services/keyless-defaults" { encrypt }
     server.src.providers.index --> "server/src/services/keyless-defaults" { getAllProviders }
-    server.src.db.index ++> "server/src/lib/min-context-window" { getSetting }
+    server.src.db.index --> "server/src/lib/min-context-window" { getSetting }
     server.src.db.index --> "server/src/services/model-groups" { getDb, getSetting, setSetting }
     "server/src/lib/endpoint-scope" --> "server/src/services/model-groups" {
         ENDPOINT_ID_SEPARATOR,
@@ -2669,7 +2666,7 @@ graph import {
         groupRefMatches,
         qualifiedModelMemberId,
     }
-    "server/src/lib/endpoint-scope" ++> "server/src/lib/tool-capability" { modelStatsKey }
+    "server/src/lib/endpoint-scope" --> "server/src/lib/tool-capability" { modelStatsKey }
     "server/src/services/key-budget" --> "server/src/lib/fallback-loop" { nextMonthResetAt }
     "server/src/services/cloudflare-daily-quota" --> "server/src/lib/fallback-loop" {
         benchCloudflareAccount,
@@ -9739,4 +9736,6 @@ graph import {
     server.src.lib.crypto --> "server/src/scripts/test-all-models" { decrypt }
     server.src.providers.index --> "server/src/scripts/test-all-models" { getProvider }
     server.src.services.scoring --> "server/src/__tests__/routes/anthropic.test" { RoutingStrategy }
+    server.src.services.scoring --> "server/src/lib/client-context" { PresetStrategy }
+    server.src.db.types --> "server/src/lib/endpoint-scope" { Db }
 }
