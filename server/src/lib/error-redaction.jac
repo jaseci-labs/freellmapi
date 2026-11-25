@@ -28,7 +28,7 @@ def:priv capped(text: any, limit: int) -> str {
 }
 
 def sanitizeProviderErrorMessage(message: any = None) -> str {
-    text: any = globalThis.String(message ?? "").trim();
+    text: any = globalThis.String("" if missing(message) else message).trim();
     if not text {
         return "Provider error";
     }

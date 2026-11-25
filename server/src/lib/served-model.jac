@@ -10,7 +10,7 @@ glob:priv PLACEHOLDERS: list[str] = ["", "default", "unknown"],
 # Cosmetic differences: case, one trailing tier tag (":free"), the namespace
 # before the last '/', and separator runs (as model-groups' normalizeGroupKey).
 def normalizeModelIdForDrift(id: any) -> str {
-    s: any = globalThis.String(id ?? "").trim().toLowerCase();
+    s: any = globalThis.String("" if missing(id) else id).trim().toLowerCase();
     s = sub(s, ":(free|beta|extended|nitro|standard)$", "");
     s = s.slice(s.lastIndexOf("/") + 1);
     return sub(s, "[\\s_-]+", "-", "g").strip();

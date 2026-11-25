@@ -64,3 +64,9 @@ describe('summarizeAttemptError', () => {
     expect(summarizeAttemptError(msg)).toBe(msg);
   });
 });
+
+describe('sanitizeProviderErrorMessage with null', () => {
+  it('treats null like undefined', () => {
+    expect(sanitizeProviderErrorMessage(null)).toBe('Provider error');
+  });
+});

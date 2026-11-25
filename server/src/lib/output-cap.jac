@@ -22,7 +22,7 @@ def:priv capKey(platform: str, modelId: str, endpointScope: any = None) -> str {
 # Both the parameter and a ceiling phrase must appear, so a context-window
 # rejection that only mentions "maximum output tokens" never matches.
 def parseMaxTokensCeiling(message: any = None) -> any {
-    msg: any = globalThis.String(message ?? "").toLowerCase();
+    msg: any = globalThis.String("" if missing(message) else message).toLowerCase();
     found: any = CEILING.exec(msg) if PARAM.test(msg) else NULL;
     ceiling: any = globalThis.Number(found[1]) if found else 0;
     return ceiling if globalThis.Number.isFinite(ceiling) and ceiling > 0 else NULL;
