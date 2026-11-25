@@ -1,0 +1,5 @@
+{
+  "admin": { "email": "bench@example.com", "password": "bench-password-123" },
+  "customProviders": [ { "baseUrl": "http://127.0.0.1:4599/v1", "apiKey": "sk-mock", "label": "mock", "models": ["mock-1"] } ],
+  "routing": { "strategy": "priority" }
+}
