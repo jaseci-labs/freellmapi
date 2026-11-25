@@ -36,6 +36,73 @@ def:priv resolveModelDbId(db: any, platform: str, modelId: str, keyId: any) -> a
     return row.id if row else NULL;
 }
 
+# The transaction bodies are module functions, not defs nested in their
+# callers: a nested def is made anew on every call, and handed to JavaScript
+# (db.transaction) it is given a new face each time, which costs more than
+# the inserts.
+def:priv incrementSetting(db: any, key: str, delta: float) {
+    db.prepare(INCREMENT).run(key, globalThis.String(delta), delta);
+}
+
+def:priv writeRequestRow(
+    db: any,
+    platform: str,
+    modelId: str,
+    keyId: any,
+    status: str,
+    inputTokens: float,
+    outputTokens: float,
+    latencyMs: float,
+    error: any,
+    ttfbMs: any,
+    requestedModel: any,
+    servedModel: any,
+    client: any,
+    caller: any,
+    failureAttribution: any,
+) {
+    inserted: any = db.prepare(INSERT_REQUEST).run(
+        platform,
+        modelId,
+        orNull(keyId),
+        status,
+        inputTokens,
+        outputTokens,
+        latencyMs,
+        orNull(error),
+        orNull(ttfbMs),
+        orNull(requestedModel),
+        orNull(servedModel),
+        client.ip,
+        client.userAgent,
+        client.agent,
+        orNull(caller),
+        resolveModelDbId(db, platform, modelId, keyId),
+        orNull(failureAttribution),
+    );
+    rowId: any = inserted.lastInsertRowid;
+    # The fallback loop keys its attempt trace to the last row noted.
+    if not missing(rowId) {
+        noteRequestRowId(rowId);
+    }
+    row: any = db.prepare("SELECT created_at FROM requests WHERE id = ?").get(rowId);
+    createdAt: any = row.created_at if row else None;
+    hour = (createdAt or new(globalThis.Date).toISOString()[:19].replace("T", " "))[:13] + ":00:00";
+    ok = 1 if status == "success" else 0;
+    failed = 1 if status == "error" else 0;
+    db.prepare(UPSERT_HOUR).run(
+        hour, ok, failed, inputTokens, outputTokens, ok, failed, inputTokens, outputTokens
+    );
+    incrementSetting(db, "total_requests", 1);
+    incrementSetting(db, "total_input_tokens", inputTokens);
+    incrementSetting(db, "total_output_tokens", outputTokens);
+    if createdAt {
+        db.prepare(
+            "INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO NOTHING"
+        ).run("first_request_at", createdAt);
+    }
+}
+
 # keyId is null for a request turned away before routing. servedModel is set
 # only where the upstream served another model (#534); caller names the
 # pathway ('http'); failureAttribution is 'provider_moment' where a failure is
@@ -57,55 +124,23 @@ def logRequest(
 ) -> bool {
     try {
         db: any = getDb();
-        client: any = getClientContext();
-        def write {
-            inserted: any = db.prepare(INSERT_REQUEST).run(
-                platform,
-                modelId,
-                orNull(keyId),
-                status,
-                inputTokens,
-                outputTokens,
-                latencyMs,
-                orNull(error),
-                orNull(ttfbMs),
-                orNull(requestedModel),
-                orNull(servedModel),
-                client.ip,
-                client.userAgent,
-                client.agent,
-                orNull(caller),
-                resolveModelDbId(db, platform, modelId, keyId),
-                orNull(failureAttribution),
-            );
-            # The fallback loop keys its attempt trace to the last row noted.
-            if not missing(inserted.lastInsertRowid) {
-                noteRequestRowId(inserted.lastInsertRowid);
-            }
-            row: any = db.prepare("SELECT created_at FROM requests WHERE id = ?").get(
-                inserted.lastInsertRowid
-            );
-            createdAt: any = row.created_at if row else None;
-            hour = (createdAt or new(globalThis.Date).toISOString()[:19].replace("T", " "))[:13]
-                + ":00:00";
-            (ok, failed) = (int(status == "success"), int(status == "error"));
-            db.prepare(UPSERT_HOUR).run(
-                hour, ok, failed, inputTokens, outputTokens, ok, failed, inputTokens, outputTokens
-            );
-            for (key, delta) in [
-                ("total_requests", 1),
-                ("total_input_tokens", inputTokens),
-                ("total_output_tokens", outputTokens),
-            ] {
-                db.prepare(INCREMENT).run(key, globalThis.String(delta), delta);
-            }
-            if createdAt {
-                db.prepare(
-                    "INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO NOTHING"
-                ).run("first_request_at", createdAt);
-            }
-        }
-        db.transaction(write)();
+        db.transaction(writeRequestRow)(
+            db,
+            platform,
+            modelId,
+            keyId,
+            status,
+            inputTokens,
+            outputTokens,
+            latencyMs,
+            error,
+            ttfbMs,
+            requestedModel,
+            servedModel,
+            getClientContext(),
+            caller,
+            failureAttribution,
+        );
         pruneRequestAnalytics(plain(db=db));
         # Soft budget alerts (#1158), once the ledger trigger has committed.
         if status == "success" and not missing(keyId) {
@@ -118,6 +153,24 @@ def logRequest(
     }
 }
 
+def:priv writeAttempts(insert: any, trace: any) {
+    rowId: any = trace.lastRequestRowId;
+    for r in trace.records {
+        insert.run(
+            rowId,
+            r.ordinal,
+            r.platform,
+            r.modelId,
+            r.keyOrdinal,
+            r.keyLabel,
+            r.outcome,
+            r.startOffsetMs,
+            r.durationMs,
+            r.errorSummary,
+        );
+    }
+}
+
 # A finished attempt trace, as one batch keyed to the ladder's terminal row,
 # written after the response is done. A trace with no parent row writes
 # nothing: its failed attempts each wrote their own row already.
@@ -127,24 +180,7 @@ def persistRequestAttempts(trace: any) {
     }
     try {
         db: any = getDb();
-        insert: any = db.prepare(INSERT_ATTEMPT);
-        def write {
-            for r in trace.records {
-                insert.run(
-                    trace.lastRequestRowId,
-                    r.ordinal,
-                    r.platform,
-                    r.modelId,
-                    r.keyOrdinal,
-                    r.keyLabel,
-                    r.outcome,
-                    r.startOffsetMs,
-                    r.durationMs,
-                    r.errorSummary,
-                );
-            }
-        }
-        db.transaction(write)();
+        db.transaction(writeAttempts)(db.prepare(INSERT_ATTEMPT), trace);
     } except Exception as e {
         globalThis.console.error("Failed to persist request attempts:", e);
     }

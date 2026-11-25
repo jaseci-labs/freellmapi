@@ -34,22 +34,33 @@ def isToolArgumentValidationEnabled -> bool {
     return False;
 }
 
+def:priv entryKey(e: any) -> str {
+    return e[0];
+}
+
 # Key order does not matter, so schemas that differ only in it share one
-# compiled validator.
+# compiled validator. Loops, not generators: this runs per tool call.
 def stableStringify(value: any = None) -> str {
+    parts: list[str] = [];
     if globalThis.Array.isArray(value) {
-        return "[" + ",".join(stableStringify(v) for v in value) + "]";
+        for v in value {
+            parts.append(stableStringify(v));
+        }
+        return "[" + ",".join(parts) + "]";
     }
     if value is NULL or callable(value) or globalThis.Object(value) is not value {
         return globalThis.JSON.stringify(value) ?? "null";
     }
-    entries = sorted(
-        [e for e in globalThis.Object.entries(value) if e[1] is not None],
-        key=lambda (e: any) -> str { e[0] },
-    );
-    return "{"
-        + ",".join(globalThis.JSON.stringify(e[0]) + ":" + stableStringify(e[1]) for e in entries)
-        + "}";
+    entries: list[any] = [];
+    for e in globalThis.Object.entries(value) {
+        if e[1] is not None {
+            entries.append(e);
+        }
+    }
+    for e in sorted(entries, key=entryKey) {
+        parts.append(globalThis.JSON.stringify(e[0]) + ":" + stableStringify(e[1]));
+    }
+    return "{" + ",".join(parts) + "}";
 }
 
 def:priv compiledFor(schema: any) -> any {

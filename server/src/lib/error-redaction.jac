@@ -32,8 +32,9 @@ def sanitizeProviderErrorMessage(message: any = None) -> str {
     if not text {
         return "Provider error";
     }
-    for (pattern, replacement) in REDACTIONS {
-        text = globalThis.String.prototype.replace.call(text, pattern, replacement);
+    # Indexed, not unpacked: a tuple pattern unpacks through the runtime.
+    for redaction in REDACTIONS {
+        text = globalThis.String.prototype.replace.call(text, redaction[0], redaction[1]);
     }
     return capped(text.trim(), 240);
 }

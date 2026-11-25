@@ -7,14 +7,15 @@ type ResolvedAuth = any;
 
 glob CLIENT_PROFILE_KEY_PREFIX: str = "sk-cp-";
 
+def:priv hmacDigest(key: any, text: str) -> any {
+    return crypto.createHmac("sha256", key).update(text).digest();
+}
+
 # HMAC both sides to fixed-length digests, so the comparison leaks neither a
 # per-character timing nor the length.
 def timingSafeStringEqual(provided: str, expected: str) -> bool {
     key = globalThis.Buffer.alloc(32);
-    def digest(text: str) -> any {
-        return crypto.createHmac("sha256", key).update(text).digest();
-    }
-    return crypto.timingSafeEqual(digest(provided), digest(expected));
+    return crypto.timingSafeEqual(hmacDigest(key, provided), hmacDigest(key, expected));
 }
 
 def mintClientProfileKey -> str {

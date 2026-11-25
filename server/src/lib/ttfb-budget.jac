@@ -16,27 +16,32 @@ def invalidateTtfbBudgetCache {
     cache = None;
 }
 
-def:priv readConfig(db: any) -> dict[str, float] {
-    settings: dict[str, any] = {
-        row.key: row.value
-        for row in db.prepare(
-            "SELECT key, value FROM settings WHERE key IN ('slow_endpoint_buffer_ms', 'ttfb_budget_window_ms', 'ttfb_budget_half_life_ms', 'ttfb_budget_min_samples')",
-        ).all()
-    };
-    def duration(key: str, fallback: float, allowZero: bool = False) -> float {
-        for raw in [settings.get(key), process.env[key.upper()]] {
-            value: any = globalThis.Number(raw) if isinstance(raw, str) and raw.strip() else -1;
-            if globalThis.Number.isFinite(value) and (value >= 0 if allowZero else value > 0) {
-                return value;
-            }
+def:priv duration(
+    settings: dict[str, any], key: str, fallback: float, allowZero: bool = False
+) -> float {
+    for raw in [settings.get(key), process.env[key.upper()]] {
+        value: any = globalThis.Number(raw) if isinstance(raw, str) and raw.strip() else -1;
+        if globalThis.Number.isFinite(value) and (value >= 0 if allowZero else value > 0) {
+            return value;
         }
-        return fallback;
+    }
+    return fallback;
+}
+
+# Read per attempt, so a loop and module functions: a comprehension and a
+# nested def are each made anew on every call.
+def:priv readConfig(db: any) -> dict[str, float] {
+    settings: dict[str, any] = {};
+    for row in db.prepare(
+        "SELECT key, value FROM settings WHERE key IN ('slow_endpoint_buffer_ms', 'ttfb_budget_window_ms', 'ttfb_budget_half_life_ms', 'ttfb_budget_min_samples')",
+    ).all() {
+        settings[row.key] = row.value;
     }
     return {
-        "bufferMs": duration("slow_endpoint_buffer_ms", 10000, True),
-        "windowMs": duration("ttfb_budget_window_ms", 7 * DAY_MS),
-        "halfLifeMs": duration("ttfb_budget_half_life_ms", 2 * DAY_MS),
-        "minSamples": duration("ttfb_budget_min_samples", 5),
+        "bufferMs": duration(settings, "slow_endpoint_buffer_ms", 10000, True),
+        "windowMs": duration(settings, "ttfb_budget_window_ms", 7 * DAY_MS),
+        "halfLifeMs": duration(settings, "ttfb_budget_half_life_ms", 2 * DAY_MS),
+        "minSamples": duration(settings, "ttfb_budget_min_samples", 5),
     };
 }
 

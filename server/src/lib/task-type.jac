@@ -40,16 +40,28 @@ def parseTaskTypeHeader(req: any) -> str {
     return declared if declared in ["code", "chat", "auto"] else "auto";
 }
 
-# Reads at most 4000 characters of the last user message.
+# Reads at most 4000 characters of the last user message. Plain loops: a
+# comprehension or reversed() is a generator made on every call.
 def deriveTaskType(tools: any = None, messages: any = None) -> str {
     if tools and tools.length > 0 {
         return "code";
     }
-    for m in reversed(list(messages or [])) {
+    if not messages {
+        return "chat";
+    }
+    i = len(messages) - 1;
+    while i >= 0 {
+        m: any = messages[i];
         if m.role == "user" {
             text: any = contentToString(m.content).slice(0, 4000);
-            return "code" if any(re.test(text) for re in CODE_MARKERS) else "chat";
+            for marker in CODE_MARKERS {
+                if marker.test(text) {
+                    return "code";
+                }
+            }
+            return "chat";
         }
+        i -= 1;
     }
     return "chat";
 }

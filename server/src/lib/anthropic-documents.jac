@@ -47,8 +47,14 @@ def:priv textFromContentSource(content: any) -> str {
     if not globalThis.Array.isArray(content) {
         return "";
     }
-    texts = [b if isinstance(b, str) else getattr(b, "text", None) if b else None for b in content];
-    return "\n".join(t for t in texts if isinstance(t, str) and t);
+    texts: list[str] = [];
+    for b in content {
+        t: any = b if isinstance(b, str) else getattr(b, "text", None) if b else None;
+        if isinstance(t, str) and t {
+            texts.append(t);
+        }
+    }
+    return "\n".join(texts);
 }
 
 def:priv field(o: any, name: str) -> str {

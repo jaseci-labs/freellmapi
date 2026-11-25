@@ -58,12 +58,16 @@ def formatSystemDatePrompt(now: any = None) -> str {
     return f"Current date: {(now or new(globalThis.Date)).toISOString()[:10]} (UTC).";
 }
 
+# A loop, not a comprehension: this runs on every request.
 def:priv systemTexts(messages: any) -> list[str] {
-    return [
-        contentToString(m.content)
-        for m in messages
-        if globalThis.String(m.role) in ["system", "developer"]
-    ];
+    texts: list[str] = [];
+    for m in messages {
+        role = globalThis.String(m.role);
+        if role == "system" or role == "developer" {
+            texts.append(contentToString(m.content));
+        }
+    }
+    return texts;
 }
 
 def hasWebSearchInRequest(messages: any, tools: any = None) -> bool {
@@ -77,11 +81,21 @@ def hasWebSearchInRequest(messages: any, tools: any = None) -> bool {
             return True;
         }
     }
-    return any('Web search results for "' in text for text in systemTexts(messages));
+    for text in systemTexts(messages) {
+        if 'Web search results for "' in text {
+            return True;
+        }
+    }
+    return False;
 }
 
 def alreadyHasDateContext(messages: any) -> bool {
-    return any(DATE_MARKER.test(text) for text in systemTexts(messages));
+    for text in systemTexts(messages) {
+        if DATE_MARKER.test(text) {
+            return True;
+        }
+    }
+    return False;
 }
 
 # Returns the caller's own array when it adds nothing.
